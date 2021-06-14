@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Анимация с canvas</title>
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <script>
+        // ОБЩАЯ ОСНОВА - СОЗДАЕМ Canvas
+
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+        
+        // ОТСКАКИВАЮЩИЙ МЯЧ
+
+        // Заготовка для отрисовки мяча с начальными координатами
+        // и начальным направлением движения (скоростью)
+        var Ball = function () {
+            this.x = 200;
+            this.y = 200;
+            this.xSpeed = -2;
+            this.ySpeed = 3;
+        };
+
+        // Отрисовываем шар
+        var circle = function (x, y, radius, fillCircle) {
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI * 2, false);
+            if (fillCircle) {
+                context.fill();
+            } else {
+                context.stroke();
+            }
+        };
+
+        // Добавляем метод circle в прототип (prototype)
+        // объекта Ball (просто засовываем функцию глубже,
+        // чтобы было удобнее писать код)
+        Ball.prototype.draw = function () {
+            circle(this.x, this.y, 7, true);
+        };
+
+        // Добавляем в прототип объекта Ball функцию смещения
+        // согласно "скорости"
+        Ball.prototype.move = function () {
+            this.x += this.xSpeed;
+            this.y += this.ySpeed;
+        };
+
+        // Проверяем (и, если нужно меняем) значение "скорости"
+        // на противоположное, при "столкновении" с границей Canvas
+        Ball.prototype.checkCollision = function () {
+            if (this.x < 0 || this.x > 400) {
+                this.xSpeed = -this.xSpeed;
+            }
+            if (this.y < 0 || this.y > 400) {
+                this.ySpeed = -this.ySpeed;
+            }
+        };
+
+        // Создаем новый объект ball класса Ball
+        var ball = new Ball();
+
+        // Помещаем в интервал все, что мы написали
+        setInterval(function () {
+            // Очищаем Canvas
+            context.clearRect(0,0,400,400);
+
+            // Рисуем, придаем движение, создаем отскок
+            ball.draw();
+            ball.move();
+            ball.checkCollision();
+            // Рисуем границу Canvas
+            context.strokeRect(0,0,400,400);
+        },5);
+    </script>
+</body>
+</html>

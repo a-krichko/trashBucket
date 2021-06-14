@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление с клавиатуры</title>
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script>
+        // ОБЩАЯ ОСНОВА - СОЗДАЕМ Canvas для рисования
+
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+        var width = canvas.width;
+        var height = canvas.height;
+
+        // Объект с названиями и кодом клавиш
+        var keyNames = {
+            32: "space",
+            37: "left",
+            38: "up",
+            39: "right",
+            40: "down",
+            16: "shift",
+            13: "enter",
+            8: "return(backspace)",
+            18: "alt",
+            17: "ctrl"
+        };
+
+        // Событие клавиатуры (нажатие клавиш)
+        // $("body").keydown(function (event) {
+        //     console.log(event.keyCode); // Отображение кода по нажатию клавиши
+        //     console.log(keyNames[event.keyCode]); // Отображение соотв-го названия по коду клавиши из массива
+        // });
+
+        // Массив с цветами для .fillStyle
+        // var colors = ["red", "orange", "yellow", "green", "blue", "purple"];
+
+        // Отрисовываем круг
+        var circle = function (x, y, radius, fillCircle) {
+            context.beginPath();
+            // context.fillStyle = colors[Math.floor(Math.random() * colors.length)]; // Цветные мячи
+            context.arc(x, y, radius, 0, Math.PI * 2, false);
+            if (fillCircle) {
+                context.fill();
+            } else {
+                context.stroke();
+            }
+        };
+
+        // Заготовка для отрисовки мяча с начальными координатами
+        // и начальным направлением движения (скоростью)
+        var Ball = function () {
+            this.x = width / 2;
+            this.y = height / 2;
+            this.xSpeed = 5;
+            // this.xSpeed = Math.floor(Math.random() * 10 - 5); // Случайное направление при перезагрузке
+            this.ySpeed = 0;
+            // this.ySpeed = Math.floor(Math.random() * 10 - 5); // Случайное направление при перезагрузке
+            // context.fillStyle = colors[Math.floor(Math.random() * colors.length)]; // Цветные мячи только при перезагрузке
+        };
+
+        // Добавляем в прототип смещение мяча + создаем правило,
+        // при касании границы - появляется с другой стороны (правило плоской Земли)
+        Ball.prototype.move = function () {
+            this.x += this.xSpeed;
+            this.y += this.ySpeed;
+
+            if (this.x < 0) {
+                this.x = width;
+            } else if (this.x > width) {
+                this.x = 0;
+            }
+            if (this.y < 0) {
+                this.y = height;
+            } else if (this.y > height) {
+                this.y = 0;
+            }
+        };
+
+        // Добавляем в прототип отрисовку мяча с динамичными координатами,
+        // фиксированным радиусом и с заполнением
+        Ball.prototype.draw = function () {
+            circle(this.x, this.y, 10, true);
+        };
+
+        // Добавляем в прототип условия для
+        // смещения при нажатии соответствующих клавиш
+        Ball.prototype.setDirection = function (direction) {
+            if (direction === "up") {
+                this.xSpeed = 0;
+                this.ySpeed = -5;
+            } else if (direction === "down") {
+                this.xSpeed = 0;
+                this.ySpeed = 5;
+            } else if (direction === "left") {
+                this.xSpeed = -5;
+                this.ySpeed = 0;
+            } else  if (direction === "right") {
+                this.xSpeed = 5;
+                this.ySpeed = 0;
+            } else if (direction === "stop") {
+                this.xSpeed = 0;
+                this.ySpeed = 0;
+            }
+        };
+
+        // Создаем объект с указанием условного
+        // кода клавиш и присвоенных им имен
+        var keyActions = {
+            32: "stop",
+            37: "left",
+            38: "up",
+            39: "right",
+            40: "down"
+        };
+
+        // Создаем объект мяч
+        var ball = new Ball();
+
+        // Создаем условие при событии (нажатие клавиш в поле "body"
+        $("body").keydown(function (event) {
+            var direction = keyActions[event.keyCode]; // Определяем и выбираем из массива нажатую клавишу (либо undefined)
+            ball.setDirection(direction); // Проверяем нажатую клавишу через прототип и реагируем
+        });
+
+        setInterval(function () {
+            context.clearRect(0,0,width,height);
+            ball.draw();
+            ball.move();
+            context.strokeRect(0,0,width,height);
+        }, 30);
+    </script>
+</body>
+</html>
